@@ -1,0 +1,5 @@
+[Match]
+Name=extern0
+
+[Network]
+DHCP=ipv4

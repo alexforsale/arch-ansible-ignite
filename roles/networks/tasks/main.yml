@@ -1,0 +1,72 @@
+---
+# various networking configurations
+# using systemd-networkd and systemd-resolved
+# https://wiki.archlinux.org/index.php/Systemd-networkd
+
+- name: create virtual bridge interface for external network
+  copy:
+    src: 01-extern0.netdev
+    dest: /etc/systemd/network/01-extern0.netdev
+    mode: '0644'
+  notify: restart systemd-networkd
+  when: network.external.bridged
+
+- name: bind external interface to bridge
+  template:
+    src: 02-extern0-bind.network.j2
+    dest: /etc/systemd/network/02-extern0-bind.network
+    mode: '0644'
+  notify: restart systemd-networkd
+  when: network.external.bridged
+
+- name: bridge external network
+  copy:
+    src: 03-extern0.network
+    dest: /etc/systemd/network/03-extern0.network
+    mode: '0644'
+  notify: restart systemd-networkd
+  when: network.external.bridged
+
+# internal network, only for router
+
+- name: create virtual bridge interface for internal network
+  copy:
+    src: 11-intern0.netdev
+    dest: /etc/systemd/network/11-intern0.netdev
+    mode: '0644'
+  notify: restart systemd-networkd
+  when: network.router
+
+- name: bind internal interface to bridge
+  template:
+    src: 12-intern0-bind.network.j2
+    dest: /etc/systemd/network/12-intern0-bind.network
+    mode: '0644'
+  notify: restart systemd-networkd
+  when: network.router
+
+- name: bridge internal network
+  template:
+    src: 13-intern0.network.j2
+    dest: /etc/systemd/network/13-intern0.network
+    mode: '0644'
+  notify: restart systemd-networkd
+  when: network.router
+
+# enable services
+- name: start systemd-resolved
+  service:
+    name: systemd-resolved
+    state: started
+    enabled: yes
+
+- name: create symbolic link for resolv.conf
+  file:
+    src: /run/systemd/resolve/stub-resolv.conf
+    dest: /etc/resolv.conf
+    state: link
+
+- name: enable systemd-networkd
+  service:
+    name: systemd-networkd
+    enabled: yes

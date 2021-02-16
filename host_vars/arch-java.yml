@@ -1,1 +1,6 @@
 ansible_ssh_host: 10.147.20.252
+network:
+  router: false
+  external:
+    interface: enp1s0
+    bridged: true

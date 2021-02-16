@@ -24,3 +24,16 @@
       - strace
     state: present
     extra_args: --asdeps
+
+- name: install nftables
+  community.general.pacman:
+    name: nftables
+    state: present
+
+- name: install routers related apps
+  community.general.pacman:
+    name:
+      - bind
+      - dhcp
+    state: present
+  when: network.router
