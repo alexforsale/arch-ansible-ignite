@@ -22,3 +22,5 @@
       - tk
       - lsof
       - strace
+    state: present
+    extra_args: --asdeps
