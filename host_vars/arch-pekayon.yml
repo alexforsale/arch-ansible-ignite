@@ -9,3 +9,5 @@ network:
     bridged: true
     address: 10.10.0.253
     netmask: 24
+kernel:
+  parameters: "loglevel=5 verbose consoleblank=600"

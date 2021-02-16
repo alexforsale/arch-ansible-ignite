@@ -4,3 +4,5 @@ network:
   external:
     interface: enp1s0
     bridged: true
+kernel:
+    parameters: "loglevel=5 verbose consoleblank=600"

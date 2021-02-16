@@ -37,3 +37,5 @@
       - dhcp
     state: present
   when: network.router
+
+- include: configs.yml
