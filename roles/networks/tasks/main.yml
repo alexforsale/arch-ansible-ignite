@@ -58,7 +58,7 @@
   service:
     name: systemd-resolved
     state: started
-    enabled: yes
+    enabled: true
 
 - name: create symbolic link for resolv.conf
   file:
@@ -69,4 +69,4 @@
 - name: enable systemd-networkd
   service:
     name: systemd-networkd
-    enabled: yes
+    enabled: true
