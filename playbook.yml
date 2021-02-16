@@ -1,0 +1,8 @@
+---
+- name: install ansible-related apps
+  hosts: all
+  remote_user: root
+
+  roles:
+    - { role: ansible, tags: ['base'] }
+    - { role: common, tags: ['base'] }
