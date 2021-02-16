@@ -1,7 +1,7 @@
 ---
 - name: install ansible and python-passlib
   community.general.pacman:
-    name: 
+    name:
       - ansible
       - python-passlib
     state: present
