@@ -1,0 +1,16 @@
+; {{ ansible_managed }}
+$TTL	1D
+@	IN	SOA	{{ ansible_domain }}. root.{{ ansible_domain }}. (
+				1		; serial
+				7D		; refresh
+				1D		; expire
+				14D		; expire
+				1D		; negative cache TTL
+)
+;
+@		IN		NS		{{ ansible_hostname }}.{{ ansible_domain }}.
+{% for host in groups['all'] %}
+{% for ip in hostvars[host].ansible_all_ipv4_addresses %}
+{{ hostvars[host].ansible_hostname }}	IN		A		{{ ip }}
+{% endfor %}
+{% endfor %}

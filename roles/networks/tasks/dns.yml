@@ -1,0 +1,70 @@
+---
+# dns related tasks
+- name: install bind
+  community.general.pacman:
+    name: bind
+    state: present
+  when: network.dns.server
+
+- name: create rndc.key
+  command:
+    cmd: rndc-confgen -a
+    creates: /etc/rndc.key
+  when: network.dns.server
+
+- name: set permission for rndc.key
+  file:
+    path: /etc/rndc.key
+    owner: named
+    mode: '0644'
+  when: network.dns.server
+
+- name: copy rndc.conf
+  copy:
+    src: rndc.conf
+    dest: /etc/rndc.conf
+    owner: root
+    group: root
+    mode: '0644'
+  when: network.dns.server
+
+- name: create named.conf
+  template:
+    src: named.conf.j2
+    dest: /etc/named.conf
+    mode: '0644'
+    validate: 'named-checkconf %s'
+  when: network.dns.server
+
+- name: create master zone file
+  template:
+    src: master.zone.j2
+    dest: /var/named/{{ network.dns.master.zone }}.zone
+    owner: named
+    group: named
+    mode: '0644'
+    force: no
+    validate: "named-checkzone {{ network.dns.master.zone }} %s"
+  when:
+    - network.dns.server
+    - network.dns.master.zone is defined
+
+- name: create master reverse zone file
+  template:
+    src: master.reverse.zone.j2
+    dest: /var/named/{{ network.dns.master.reverse }}.zone
+    owner: named
+    group: named
+    mode: '0644'
+    force: no
+    validate: "named-checkzone {{ network.dns.master.reverse }} %s"
+  when:
+    - network.dns.server
+    - network.dns.master.reverse is defined
+
+- name: enable and start named
+  service:
+    name: named
+    state: started
+    enabled: yes
+  when: network.dns.server

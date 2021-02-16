@@ -1,0 +1,12 @@
+; {{ ansible_managed }}
+$TTL	1D
+@	IN	SOA	{{ ansible_domain }}. root.{{ ansible_domain }}. (
+                                1               ; serial
+                                7D              ; refresh
+                                1D              ; expire
+                                14D             ; expire
+                                1D              ; negative cache TTL
+)
+;
+@		IN		NS		{{ ansible_hostname }}.{{ ansible_domain }}.
+{{ network.dns.master.octet }}		IN		PTR		{{ ansible_hostname }}.{{ ansible_domain }}.

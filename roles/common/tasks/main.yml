@@ -33,8 +33,7 @@
 - name: install routers related apps
   community.general.pacman:
     name:
-      - bind
-      - dhcp
+      - ntp
     state: present
   when: network.router
 

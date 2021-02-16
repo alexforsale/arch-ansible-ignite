@@ -1,0 +1,3 @@
+zerotier:
+  ip: 10.147.20.0
+  netmask: 24

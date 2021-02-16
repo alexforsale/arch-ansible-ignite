@@ -70,3 +70,5 @@
   service:
     name: systemd-networkd
     enabled: true
+
+- include: dns.yml

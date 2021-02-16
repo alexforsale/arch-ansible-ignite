@@ -5,5 +5,17 @@
 
   roles:
     - {role: ansible, tags: ['base']}
+
+- name: setup common tasks
+  hosts: all
+  remote_user: root
+
+  roles:
     - {role: common, tags: ['base']}
+
+- name: setup networking tasks
+  hosts: all
+  remote_user: root
+
+  roles:
     - {role: networks, tags: ['base', 'networks']}

@@ -9,5 +9,14 @@ network:
     bridged: true
     address: 10.10.0.253
     netmask: 24
+  dns:
+    server: true
+    master:
+      zone: java281.lan
+      reverse: 0.10.10.in-addr.arpa
+      octet: 253
+  lan:
+    address: 10.10.0.0
+    netmask: 24
 kernel:
   parameters: "loglevel=5 verbose consoleblank=600"

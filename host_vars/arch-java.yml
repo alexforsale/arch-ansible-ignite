@@ -4,5 +4,16 @@ network:
   external:
     interface: enp1s0
     bridged: true
+  dns:
+    server: true
+    master:
+      reverse: 10.0.10.in-addr.arpa
+      octet: 252
+    slave:
+      zone: java281.lan
+      master: 10.147.20.253
+  lan:
+    address: 10.0.10.0
+    netmask: 24
 kernel:
-    parameters: "loglevel=5 verbose consoleblank=600"
+  parameters: "loglevel=5 verbose consoleblank=600"

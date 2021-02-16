@@ -1,0 +1,65 @@
+// {{ ansible_managed }}
+
+acl local-networks {
+    127.0.0.1;
+    ::1;
+    {{zerotier.ip}}/{{zerotier.netmask}};
+    {{network.lan.address}}/{{network.lan.netmask}};
+};
+
+include "/etc/rndc.key";
+
+options {
+    directory "/var/named";
+    pid-file "/run/named/named.pid";
+
+    allow-recursion { local-networks; };
+    allow-transfer { local-networks; };
+    allow-update { none; };
+
+    version none;
+    hostname none;
+    server-id none;
+};
+
+zone "localhost" IN {
+    type master;
+    file "localhost.zone";
+};
+
+zone "0.0.127.in-addr.arpa" IN {
+    type master;
+    file "127.0.0.zone";
+};
+
+{% if network.dns.master.zone is defined %}
+zone "{{ network.dns.master.zone }}" IN {
+    type master;
+    file "{{ network.dns.master.zone }}.zone";
+    allow-update { key rndc-key; };
+};
+{% endif %}
+
+{% if network.dns.master.reverse is defined %}
+zone "{{ network.dns.master.reverse }}" IN {
+    type master;
+    file "{{ network.dns.master.reverse }}.zone";
+    allow-update { key rndc-key; };
+};
+{% endif %}
+
+{% if network.dns.slave.zone is defined %}
+zone "{{ network.dns.slave.zone }}" IN {
+    type slave;
+    file "{{ network.dns.slave.zone }}.zone";
+    masters { {{ network.dns.slave.master }}; };
+};
+{% endif %}
+
+{% if network.dns.slave.reverse is defined %}
+zone "{{ network.dns.slave.reverse }}" IN {
+    type slave;
+    file "{{ network.dns.slave.reverse}}.zone";
+    masters { {{ network.dns.slave.master }}; };
+};
+{% endif %}
