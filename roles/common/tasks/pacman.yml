@@ -1,0 +1,87 @@
+---
+# pacman related configurations
+
+- name: set pacman CleanMethod
+  lineinfile:
+    dest: /etc/pacman.conf
+    regexp: '^#CleanMethod ='
+    state: present
+    line: 'CleanMethod = KeepInstalled'
+  tags: configs
+
+- name: set pacman to use syslog
+  lineinfile:
+    dest: /etc/pacman.conf
+    regexp: '^#UseSyslog'
+    state: present
+    line: 'UseSyslog'
+  tags: configs
+
+- name: set pacman to use color
+  lineinfile:
+    dest: /etc/pacman.conf
+    regexp: '^#Color'
+    state: present
+    line: 'Color'
+  tags: configs
+
+- name: set pacman to use total download
+  lineinfile:
+    dest: /etc/pacman.conf
+    regexp: '^#TotalDownload'
+    state: present
+    line: 'TotalDownload'
+  tags: configs
+
+- name: set pacman to use total verbose package list
+  lineinfile:
+    dest: /etc/pacman.conf
+    regexp: '^#VerbosePkgLists'
+    state: present
+    line: 'VerbosePkgLists'
+  tags: configs
+
+- name: enable multilib repository
+  blockinfile:
+    path: /etc/pacman.conf
+    block: |
+      [multilib]
+      Include = /etc/pacman.d/mirrorlist
+    insertafter: |
+      #[multilib]
+      #Include = /etc/pacman.d/mirrorlist
+  tags: configs
+
+- name: install reflector
+  community.general.pacman:
+    name: reflector
+    state: present
+  tags: packages
+
+- name: use latest 15 in reflector.conf
+  lineinfile:
+    path: /etc/xdg/reflector/reflector.conf
+    regexp: '^--latest 5'
+    state: present
+    line: '--latest 15'
+  tags: configs
+
+- name: set counties for reflector.conf
+  blockinfile:
+    path: /etc/xdg/reflector/reflector.conf
+    block: |
+      --country Indonesia,Malaysia,Singapore
+    insertafter: '# --country France,Germany'
+  tags: configs
+
+- name: enable and start reflector service
+  service:
+    name: reflector
+    enabled: true
+    state: started
+  tags: configs
+
+- name: refresh pacman cache
+  community.general.pacman:
+    update_cache: true
+  tags: configs

@@ -5,12 +5,14 @@
     name: bind
     state: present
   when: network.dns.server
+  tags: packages
 
 - name: create rndc.key
   command:
     cmd: rndc-confgen -a
     creates: /etc/rndc.key
   when: network.dns.server
+  tags: configs
 
 - name: set permission for rndc.key
   file:
@@ -18,6 +20,7 @@
     owner: named
     mode: '0644'
   when: network.dns.server
+  tags: configs
 
 - name: create named.conf
   template:
@@ -26,6 +29,7 @@
     mode: '0644'
     validate: 'named-checkconf %s'
   when: network.dns.server
+  tags: configs
 
 - name: create master zone file
   template:
@@ -39,6 +43,7 @@
   when:
     - network.dns.server
     - network.dns.master.zone is defined
+  tags: configs
 
 - name: create master reverse zone file
   template:
@@ -47,11 +52,12 @@
     owner: named
     group: named
     mode: '0644'
-    force: no
+    force: false
     validate: "named-checkzone {{ network.dns.master.reverse }} %s"
   when:
     - network.dns.server
     - network.dns.master.reverse is defined
+  tags: configs
 
 - name: create master directory in /var/named
   file:
@@ -61,34 +67,43 @@
     owner: named
     group: named
   when: network.dns.server
+  tags: configs
 
 - name: clean all files inside directory
-  shell: cd /var/named/master && find -mindepth 1 -maxdepth 1 -print0 | xargs -0 rm -rf --
+  shell: |
+    set -o pipefail
+    cd /var/named/master
+    find -mindepth 1 -maxdepth 1 -print0 | xargs -0 rm -rf --
   when: network.dns.server
+  tags: configs
 
 - name: generate ZSK key
   command: dnssec-keygen -a NSEC3RSASHA1 -b 2048 -n zone "{{ network.dns.master.zone }}"
   args:
     chdir: /var/named/master/
   when: network.dns.master.zone is defined
+  tags: configs
 
 - name: generate KSK key
   command: dnssec-keygen -f KSK -a NSEC3RSASHA1 -b 4096 -n zone "{{ network.dns.master.zone }}"
   args:
     chdir: /var/named/master/
   when: network.dns.master.zone is defined
+  tags: configs
 
 - name: generate ZSK key for reverse zone
   command: dnssec-keygen -a NSEC3RSASHA1 -b 2048 -n zone "{{ network.dns.master.reverse }}"
   args:
     chdir: /var/named/master/
   when: network.dns.master.reverse is defined
+  tags: configs
 
 - name: generate KSK key for reverse zone
   command: dnssec-keygen -f KSK -a NSEC3RSASHA1 -b 4096 -n zone "{{ network.dns.master.reverse }}"
   args:
     chdir: /var/named/master/
   when: network.dns.master.reverse is defined
+  tags: configs
 
 - name: recursively change ownership of /var/named/master
   file:
@@ -97,19 +112,22 @@
     recurse: true
     owner: named
     group: named
+  tags: configs
 
-- name: enable and start named
+- name: enable and restart named
   service:
     name: named
     state: restarted
     enabled: true
   when: network.dns.server
+  tags: configs
 
 - name: install dnscrypt-proxy
   community.general.pacman:
     name: dnscrypt-proxy
     state: present
   when: network.dns.server
+  tags: packages
 
 - name: install python-urllib3
   community.general.pacman:
@@ -117,6 +135,7 @@
     state: present
     extra_args: --asdeps
   when: network.dns.server
+  tags: packages
 
 - name: configure dnscrypt-proxy.toml listen address
   lineinfile:
@@ -125,6 +144,7 @@
     state: present
     line: "listen_addresses = ['127.0.0.1:53000', '[::1]:53000']"
   when: network.dns.server
+  tags: configs
 
 - name: configure dnscrypt-proxy.toml dnssec
   lineinfile:
@@ -133,6 +153,7 @@
     state: present
     line: "require_dnssec = true"
   when: network.dns.server
+  tags: configs
 
 - name: configure dnscrypt-proxy.toml log level
   lineinfile:
@@ -141,12 +162,15 @@
     state: present
     line: "log_level = 2"
   when: network.dns.server
+  tags: configs
 
-- name: enable dnscrypt-proxy
+- name: enable and restart dnscrypt-proxy
   service:
     name: dnscrypt-proxy
     enabled: true
+    state: restarted
   when: network.dns.server
+  tags: configs
 
 - name: set systemd resolved.conf DNS
   lineinfile:
@@ -155,6 +179,7 @@
     state: present
     line: 'DNS=127.0.0.1 ::1'
   when: network.dns.server
+  tags: configs
 
 - name: set systemd resolved.conf fallback DNS
   lineinfile:
@@ -163,6 +188,7 @@
     state: present
     line: 'FallbackDNS=1.1.1.1 1.0.0.1'
   when: network.dns.server
+  tags: configs
 
 - name: set systemd resolved.conf domain
   lineinfile:
@@ -171,10 +197,12 @@
     state: present
     line: "Domains={{ ansible_domain }}"
   when: network.dns.server
+  tags: configs
 
-- name: enable and start systemd-resolved
+- name: enable and restart systemd-resolved
   service:
     name: systemd-resolved
     enabled: true
     state: restarted
   when: network.dns.server
+  tags: configs

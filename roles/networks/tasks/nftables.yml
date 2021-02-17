@@ -5,9 +5,11 @@
     dest: /etc/nftables.conf
     mode: '0644'
     validate: "nft -cf %s"
+  tags: configs
 
-- name: enable nftables
+- name: enable and restart nftables
   service:
     name: nftables
-    enabled: yes
+    enabled: true
     state: restarted
+  tags: configs

@@ -10,6 +10,7 @@
     mode: '0644'
   notify: restart systemd-networkd
   when: network.external.bridged
+  tags: configs
 
 - name: bind external interface to bridge
   template:
@@ -18,6 +19,7 @@
     mode: '0644'
   notify: restart systemd-networkd
   when: network.external.bridged
+  tags: configs
 
 - name: bridge external network
   copy:
@@ -26,6 +28,7 @@
     mode: '0644'
   notify: restart systemd-networkd
   when: network.external.bridged
+  tags: configs
 
 # internal network, only for router
 
@@ -36,6 +39,7 @@
     mode: '0644'
   notify: restart systemd-networkd
   when: network.router
+  tags: configs
 
 - name: bind internal interface to bridge
   template:
@@ -44,6 +48,7 @@
     mode: '0644'
   notify: restart systemd-networkd
   when: network.router
+  tags: configs
 
 - name: bridge internal network
   template:
@@ -52,6 +57,7 @@
     mode: '0644'
   notify: restart systemd-networkd
   when: network.router
+  tags: configs
 
 - name: enable ipforward
   copy:
@@ -59,6 +65,7 @@
     dest: /etc/sysctl.d/30-ipforward.conf
     mode: '0644'
   notify: load sysctl
+  tags: configs
 
 # enable services
 - name: restart systemd-resolved
@@ -66,18 +73,29 @@
     name: systemd-resolved
     state: restarted
     enabled: true
+  tags: configs
 
 - name: create symbolic link for resolv.conf
   file:
     src: /run/systemd/resolve/resolv.conf
     dest: /etc/resolv.conf
     state: link
+  tags: configs
 
 - name: enable systemd-networkd
   service:
     name: systemd-networkd
     enabled: true
+  tags: configs
 
-- include: dns.yml
-- include: dhcp.yml
-- include: nftables.yml
+- name: dns setups
+  include: dns.yml
+  tags: dns
+
+- name: dhcp setups
+  include: dhcp.yml
+  tags: dhcp
+
+- name: nftables setups
+  include: nftables.yml
+  tags: nftables

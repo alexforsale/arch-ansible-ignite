@@ -5,6 +5,7 @@
       - base
       - base-devel
     state: present
+  tags: packages
 
 - name: Install system monitoring related apps
   community.general.pacman:
@@ -15,6 +16,7 @@
       - smartmontools
       - progress
     state: present
+  tags: packages
 
 - name: install needed dependencies for monitoring-related apps
   community.general.pacman:
@@ -24,11 +26,13 @@
       - strace
     state: present
     extra_args: --asdeps
+  tags: packages
 
 - name: install nftables
   community.general.pacman:
     name: nftables
     state: present
+  tags: packages
 
 - name: install routers related apps
   community.general.pacman:
@@ -36,5 +40,47 @@
       - ntp
     state: present
   when: network.router
+  tags: packages
 
-- include: configs.yml
+- name: install ansible and python-passlib
+  community.general.pacman:
+    name:
+      - ansible
+      - python-passlib
+    state: present
+  tags: packages
+
+- name: install ansible-lint
+  community.general.pacman:
+    name:
+      - ansible-lint
+    state: present
+  tags: packages
+
+- name: install ansible-lint dependency
+  community.general.pacman:
+    name: yamllint
+    extra_args: --asdeps
+    state: present
+  tags: packages
+
+- name: set kernel commandline
+  lineinfile:
+    dest: /etc/default/grub
+    regexp: '^GRUB_CMDLINE_LINUX_DEFAULT'
+    state: present
+    line: 'GRUB_CMDLINE_LINUX_DEFAULT="{{ kernel.parameters }}"'
+  when: kernel.parameters
+  notify: rebuild grub
+  tags: configs
+
+- name: enable and start smartd service
+  service:
+    name: smartd
+    state: started
+    enabled: true
+  tags: configs
+
+- name: pacman-related setup
+  include: pacman.yml
+  tags: pacman
