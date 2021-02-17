@@ -20,10 +20,13 @@ options {
     version none;
     hostname none;
     server-id none;
+{% if network.dns.forwarders is defined %}
+    forwarders {
 {% for ip in network.dns.forwarders %}
     {{ ip }};
-};
 {% endfor %}
+    };
+{% endif %}
 };
 
 zone "localhost" IN {
