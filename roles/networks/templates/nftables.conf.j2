@@ -37,8 +37,9 @@ table inet filter {
     ct state invalid counter drop
     ct state {established, related} counter accept
 
-    meta l4proto icmp icmp type { destination-unreachable, router-solicitation, router-advertisement, time-exceeded, parameter-problem } counter accept
-    meta l4proto ipv6-icmp icmpv6 type { destination-unreachable, packet-too-big, time-exceeded, parameter-problem, mld-listener-query, mld-listener-report, mld-listener-reduction, nd-router-solicit, nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert, ind-neighbor-solicit, ind-neighbor-advert, mld2-listener-report } counter accept
+    meta l4proto icmp limit rate 4/second counter accept
+    meta l4proto ipv6-icmp limit rate 4/second counter accept
+    ip protocol igmp limit rate 4/second counter accept
 
     udp dport mdns counter accept
     tcp dport ssh counter accept
@@ -54,7 +55,8 @@ table inet filter {
     tcp dport netbios-ssn ip saddr $local4 counter accept comment "Accept NetBIOS Session Service (smbd)"
     tcp dport microsoft-ds ip6 saddr $local6 counter accept comment "Accept Microsoft Directory Service (smbd)"
     tcp dport microsoft-ds ip saddr $local4 counter accept comment "Accept Microsoft Directory Service (smbd)"
-
+    udp dport llmnr ip6 saddr $local6 counter accept
+    udp dport llmnr ip saddr $local4 counter accept
     udp sport bootpc udp dport bootps ip saddr 0.0.0.0 ip daddr 255.255.255.255 counter accept comment "Accept DHCPDISCOVER (for DHCP-Proxy)"
     udp sport { bootpc, 4011 } udp dport { bootps, 4011 } ip saddr $local4 counter accept comment "Accept PXE"
     udp dport tftp ip6 saddr $local6 counter accept comment "Accept TFTP"
@@ -67,6 +69,7 @@ table inet filter {
     udp dport $ephemeral counter accept
 
     udp dport domain counter accept
+    tcp dport domain counter accept
     udp dport bootpc counter accept
     udp dport bootps counter accept
 
