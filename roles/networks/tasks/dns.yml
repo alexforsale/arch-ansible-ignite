@@ -106,7 +106,7 @@
 - name: enable and start named
   service:
     name: named
-    state: started
+    state: restarted
     enabled: yes
   when: network.dns.server
 

@@ -10,3 +10,4 @@
   service:
     name: nftables
     enabled: yes
+    state: restarted
