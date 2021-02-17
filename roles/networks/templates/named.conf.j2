@@ -3,8 +3,10 @@
 acl local-networks {
     127.0.0.1;
     ::1;
-    {{zerotier.ip}}/{{zerotier.netmask}};
-    {{network.lan.address}}/{{network.lan.netmask}};
+    10.0.0.0/8;
+    172.16.0.0/12;
+    192.168.0.0/16;
+    169.254.0.0/16;
 };
 
 include "/etc/rndc.key";
@@ -13,8 +15,15 @@ options {
     directory "/var/named";
     pid-file "/run/named/named.pid";
 
+    listen-on { any; };
+
+    dnssec-validation no;
+
+    recursion yes;
     allow-recursion { local-networks; };
     allow-transfer { local-networks; };
+    allow-query { local-networks; };
+    allow-query-cache { local-networks; };
     allow-update { none; };
 
     version none;
@@ -27,6 +36,10 @@ options {
 {% endfor %}
     };
 {% endif %}
+};
+
+controls {
+    inet 127.0.0.1 port 953 allow { 127.0.0.1; } keys { rndc-key; };
 };
 
 zone "localhost" IN {
@@ -44,6 +57,9 @@ zone "{{ network.dns.master.zone }}" IN {
     type master;
     file "{{ network.dns.master.zone }}.zone";
     allow-update { key rndc-key; };
+    auto-dnssec maintain;
+    inline-signing yes;
+    key-directory "master/";
 };
 {% endif %}
 
@@ -52,6 +68,9 @@ zone "{{ network.dns.master.reverse }}" IN {
     type master;
     file "{{ network.dns.master.reverse }}.zone";
     allow-update { key rndc-key; };
+    auto-dnssec maintain;
+    inline-signing yes;
+    key-directory "master/";
 };
 {% endif %}
 
