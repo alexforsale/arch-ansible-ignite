@@ -19,3 +19,8 @@ network:
   lan:
     address: 10.0.10.0
     netmask: 24
+
+display:
+  server: xorg
+  driver: intel
+  manager: lightdm

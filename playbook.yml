@@ -4,3 +4,4 @@
   roles:
     - {role: common, tags: ['common']}
     - {role: networks, tags: ['networks']}
+    - {role: gui, tags: ['gui']}

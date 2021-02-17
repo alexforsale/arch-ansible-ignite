@@ -28,3 +28,8 @@ network:
       start: 10.10.0.100
       end: 10.10.0.200
     router: 10.10.0.253
+
+display:
+  server: xorg
+  driver: intel
+  manager: lightdm

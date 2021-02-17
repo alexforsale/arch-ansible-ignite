@@ -1,0 +1,58 @@
+---
+- name: install xorg package group
+  community.general.pacman:
+    name: xorg
+    state: present
+  when: display.server == "xorg"
+  tags: packages
+
+- name: install display-manager
+  community.general.pacman:
+    name:
+      - xorg-xinit
+      - "{{ display.manager }}"
+    state: present
+    extra_args: --asdeps
+  when:
+    - display.server == "xorg"
+    - display.manager is defined
+  tags: packages
+
+- name: install lightdm dependencies
+  community.general.pacman:
+    name:
+      - accountsservice
+      - lightdm-gtk-greeter
+      - xorg-server-xephyr
+    state: present
+    extra_args: --asdeps
+  when:
+    - display.server == "xorg"
+    - display.manager == "lightdm"
+  tags: packages
+
+- name: install xorg driver
+  community.general.pacman:
+    name:
+      - mesa
+      - lib32-mesa
+    state: present
+  when: display.driver == "intel"
+  tags: packages
+
+- name: intel video acceleration
+  community.general.pacman:
+    name:
+      - intel-media-driver
+      - libva-intel-driver
+    state: present
+  when: display.driver == "intel"
+  tags: packages
+
+- name: intel video acceleration optional packages
+  community.general.pacman:
+    name: libva-utils
+    state: present
+    extra_args: --asdeps
+  when: display.driver == "intel"
+  tags: packages
