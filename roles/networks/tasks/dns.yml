@@ -62,6 +62,47 @@
     - network.dns.server
     - network.dns.master.reverse is defined
 
+- name: create master directory in /var/named
+  file:
+    path: /var/named/master
+    state: directory
+    mode: '0755'
+    owner: named
+    group: named
+  when: network.dns.server
+
+- name: generate ZSK key
+  command: dnssec-keygen -a NSEC3RSASHA1 -b 2048 -n zone "{{ network.dns.master.zone }}"
+  args:
+    chdir: /var/named/master/
+  when: network.dns.master.zone is defined
+
+- name: generate KSK key
+  command: dnssec-keygen -f KSK -a NSEC3RSASHA1 -b 4096 -n zone "{{ network.dns.master.zone }}"
+  args:
+    chdir: /var/named/master/
+  when: network.dns.master.zone is defined
+
+- name: generate ZSK key for reverse zone
+  command: dnssec-keygen -a NSEC3RSASHA1 -b 2048 -n zone "{{ network.dns.master.reverse }}"
+  args:
+    chdir: /var/named/master/
+  when: network.dns.master.reverse is defined
+
+- name: generate KSK key for reverse zone
+  command: dnssec-keygen -f KSK -a NSEC3RSASHA1 -b 4096 -n zone "{{ network.dns.master.reverse }}"
+  args:
+    chdir: /var/named/master/
+  when: network.dns.master.reverse is defined
+
+- name: recursively change ownership of /var/named/master
+  file:
+    path: /var/named/master
+    state: directory
+    recurse: yes
+    owner: named
+    group: named
+
 - name: enable and start named
   service:
     name: named
@@ -111,3 +152,36 @@
     name: dnscrypt-proxy
     enabled: yes
   when: network.dns.server
+
+- name: set systemd resolved.conf DNS
+  lineinfile:
+    dest: /etc/systemd/resolved.conf
+    regexp: '^#DNS='
+    state: present
+    line: 'DNS=127.0.0.1 ::1'
+  when: network.dns.server
+
+- name: set systemd resolved.conf fallback DNS
+  lineinfile:
+    dest: /etc/systemd/resolved.conf
+    regexp: '^#FallbackDNS='
+    state: present
+    line: 'FallbackDNS=1.1.1.1 1.0.0.1'
+  when: network.dns.server
+
+- name: set systemd resolved.conf domain
+  lineinfile:
+    dest: /etc/systemd/resolved.conf
+    regexp: '^#Domains='
+    state: present
+    line: "Domains={{ ansible_domain }}"
+  when: network.dns.server
+
+- name: enable and start systemd-resolved
+  service:
+    name: systemd-resolved
+    enabled: yes
+    state: restarted
+  when: network.dns.server
+
+

@@ -69,7 +69,7 @@
 
 - name: create symbolic link for resolv.conf
   file:
-    src: /run/systemd/resolve/stub-resolv.conf
+    src: /run/systemd/resolve/resolv.conf
     dest: /etc/resolv.conf
     state: link
 
