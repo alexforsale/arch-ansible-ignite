@@ -71,6 +71,10 @@
     group: named
   when: network.dns.server
 
+- name: clean all files inside directory
+  shell: cd /var/named/master && find -mindepth 1 -maxdepth 1 -print0 | xargs -0 rm -rf --
+  when: network.dns.server
+
 - name: generate ZSK key
   command: dnssec-keygen -a NSEC3RSASHA1 -b 2048 -n zone "{{ network.dns.master.zone }}"
   args:
