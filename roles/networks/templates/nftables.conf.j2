@@ -82,7 +82,7 @@ table inet filter {
     ct state {established, related} counter accept
     ct state invalid counter drop
 
-    log prefix "FORWARD REJECT: " counter reject with icmpx type port-unreachable
+    #log prefix "FORWARD REJECT: " counter reject with icmpx type port-unreachable
   }
   chain output {
     type filter hook output priority 0;
