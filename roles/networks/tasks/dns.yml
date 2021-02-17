@@ -43,7 +43,7 @@
     owner: named
     group: named
     mode: '0644'
-    force: no
+    force: false
     validate: "named-checkzone {{ network.dns.master.zone }} %s"
   when:
     - network.dns.server
@@ -99,7 +99,7 @@
   file:
     path: /var/named/master
     state: directory
-    recurse: yes
+    recurse: true
     owner: named
     group: named
 
@@ -107,7 +107,7 @@
   service:
     name: named
     state: restarted
-    enabled: yes
+    enabled: true
   when: network.dns.server
 
 - name: install dnscrypt-proxy
@@ -150,7 +150,7 @@
 - name: enable dnscrypt-proxy
   service:
     name: dnscrypt-proxy
-    enabled: yes
+    enabled: true
   when: network.dns.server
 
 - name: set systemd resolved.conf DNS
@@ -180,8 +180,6 @@
 - name: enable and start systemd-resolved
   service:
     name: systemd-resolved
-    enabled: yes
+    enabled: true
     state: restarted
   when: network.dns.server
-
-
