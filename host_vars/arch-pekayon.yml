@@ -15,8 +15,13 @@ network:
       zone: java281.lan
       reverse: 0.10.10.in-addr.arpa
       octet: 253
+  dhcp:
+    server: true
   lan:
     address: 10.10.0.0
     netmask: 24
-kernel:
-  parameters: "loglevel=5 verbose consoleblank=600"
+    netmask2: 255.255.255.0
+    range:
+      start: 10.10.0.100
+      end: 10.10.0.200
+    router: 10.10.0.253

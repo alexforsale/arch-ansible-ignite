@@ -4,3 +4,7 @@
   service:
     name: systemd-networkd
     state: restarted
+
+- name: load sysctl
+  command:
+    cmd: sysctl --system

@@ -1,0 +1,30 @@
+# {{ ansible_managed }}
+authoritative;
+option domain-name "{{ ansible_domain }}";
+option domain-name-servers {{ ansible_hostname }}.{{ ansible_domain }};
+
+ddns-updates on;
+ddns-update-style interim;
+ignore client-updates;
+update-static-leases on;
+
+default-lease-time 600;
+max-lease-time 7200;
+log-facility local7;
+
+include "/etc/rndc.key";
+
+zone {{ ansible_domain }}. {
+    primary 127.0.0.1;
+    key rndc-key;
+}
+
+zone {{ network.dns.master.reverse }}. {
+    primary 127.0.0.1;
+    key rndc-key;
+}
+
+subnet {{ network.lan.address }} netmask {{ network.lan.netmask2 }} {
+    range {{ network.lan.range.start }} {{ network.lan.range.end }};
+    option routers {{ network.lan.router }};
+}

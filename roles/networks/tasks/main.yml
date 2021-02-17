@@ -53,6 +53,13 @@
   notify: restart systemd-networkd
   when: network.router
 
+- name: enable ipforward
+  copy:
+    src: 30-ipforward.conf
+    dest: /etc/sysctl.d/30-ipforward.conf
+    mode: '0644'
+  notify: load sysctl
+
 # enable services
 - name: start systemd-resolved
   service:
@@ -72,3 +79,5 @@
     enabled: true
 
 - include: dns.yml
+- include: dhcp.yml
+- include: nftables.yml

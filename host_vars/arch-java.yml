@@ -15,5 +15,3 @@ network:
   lan:
     address: 10.0.10.0
     netmask: 24
-kernel:
-  parameters: "loglevel=5 verbose consoleblank=600"

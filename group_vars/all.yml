@@ -1,3 +1,5 @@
 zerotier:
   ip: 10.147.20.0
   netmask: 24
+kernel:
+  parameters: "loglevel=5 quiet consoleblank=600"

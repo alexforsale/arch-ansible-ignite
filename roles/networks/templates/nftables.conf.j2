@@ -1,0 +1,86 @@
+# {{ ansible_managed }}
+#!/usr/bin/nft -f
+# ipv4/ipv6 Simple and Safe Firewall
+# you can find examples in /usr/share/nftables/
+
+flush ruleset
+
+define local4 = {
+  10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16, 169.254.0.0/16
+}
+
+define local6 = {
+  fd00::/8, fe80::/10
+}
+
+define ephemeral = {
+  32768-60999
+}
+
+table inet nat {
+  chain prerouting {
+    type nat hook prerouting priority -100;
+  }
+
+  chain postrouting {
+    type nat hook postrouting priority 100;
+    oifname extern0 counter masquerade comment "masquerade connection from extern0"
+  }
+}
+
+table inet filter {
+  chain input {
+    type filter hook input priority 0; policy drop;
+
+    iifname lo counter accept
+
+    ct state invalid counter drop
+    ct state {established, related} counter accept
+
+    meta l4proto icmp icmp type { destination-unreachable, router-solicitation, router-advertisement, time-exceeded, parameter-problem } counter accept
+    meta l4proto ipv6-icmp icmpv6 type { destination-unreachable, packet-too-big, time-exceeded, parameter-problem, mld-listener-query, mld-listener-report, mld-listener-reduction, nd-router-solicit, nd-router-advert, nd-neighbor-solicit, nd-neighbor-advert, ind-neighbor-solicit, ind-neighbor-advert, mld2-listener-report } counter accept
+
+    udp dport mdns counter accept
+    tcp dport ssh counter accept
+    tcp dport ipp counter accept
+    tcp dport { http, https } counter accept
+
+    meta l4proto { tcp, udp } th dport 2049 ip saddr $local4 counter accept comment "Accept NFS"
+    udp dport netbios-ns ip6 saddr $local6 counter accept comment "Accept NetBIOS Name Service (nmbd)"
+    udp dport netbios-ns ip saddr $local4 counter accept comment "Accept NetBIOS Name Service (nmbd)"
+    udp dport netbios-dgm ip6 saddr $local6 counter accept comment "Accept NetBIOS Datagram Service (nmbd)"
+    udp dport netbios-dgm ip saddr $local4 counter accept comment "Accept NetBIOS Datagram Service (nmbd)"
+    tcp dport netbios-ssn ip6 saddr $local6 counter accept comment "Accept NetBIOS Session Service (smbd)"
+    tcp dport netbios-ssn ip saddr $local4 counter accept comment "Accept NetBIOS Session Service (smbd)"
+    tcp dport microsoft-ds ip6 saddr $local6 counter accept comment "Accept Microsoft Directory Service (smbd)"
+    tcp dport microsoft-ds ip saddr $local4 counter accept comment "Accept Microsoft Directory Service (smbd)"
+
+    udp sport bootpc udp dport bootps ip saddr 0.0.0.0 ip daddr 255.255.255.255 counter accept comment "Accept DHCPDISCOVER (for DHCP-Proxy)"
+    udp sport { bootpc, 4011 } udp dport { bootps, 4011 } ip saddr $local4 counter accept comment "Accept PXE"
+    udp dport tftp ip6 saddr $local6 counter accept comment "Accept TFTP"
+    udp dport tftp ip saddr $local4 counter accept comment "Accept TFTP"
+
+    udp sport 1900 udp dport >= 1024 ip6 saddr $local6 meta pkttype unicast limit rate 4/second burst 20 packets counter accept comment "Accept UPnP IGD port mapping reply"
+    udp sport 1900 udp dport >= 1024 ip saddr $local4 meta pkttype unicast limit rate 4/second burst 20 packets counter accept comment "Accept UPnP IGD port mapping reply"
+
+    tcp dport $ephemeral counter accept
+    udp dport $ephemeral counter accept
+
+    udp dport domain counter accept
+    udp dport bootpc counter accept
+    udp dport bootps counter accept
+
+    # everything else
+    log prefix "INPUT REJECT: " counter reject with icmpx type port-unreachable
+  }
+  chain forward {
+    type filter hook forward priority 0; policy accept
+    ct state {established, related} counter accept
+    ct state invalid counter drop
+
+    log prefix "FORWARD REJECT: " counter reject with icmpx type port-unreachable
+  }
+  chain output {
+    type filter hook output priority 0;
+  }
+}

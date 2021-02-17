@@ -1,0 +1,16 @@
+---
+- name: copy dhcpd.conf
+  template:
+    src: dhcpd.conf.j2
+    dest: /etc/dhcpd.conf
+    owner: root
+    group: root
+    mode: '0644'
+    validate: "dhcpd -4 -t %s"
+  when: network.dhcp.server is defined
+
+- name: enable dhcpd4 service
+  service:
+    name: dhcpd4
+    enabled: yes
+  when: network.dhcp.server is defined
