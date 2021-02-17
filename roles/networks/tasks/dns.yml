@@ -19,15 +19,6 @@
     mode: '0644'
   when: network.dns.server
 
-- name: copy rndc.conf
-  copy:
-    src: rndc.conf
-    dest: /etc/rndc.conf
-    owner: root
-    group: root
-    mode: '0644'
-  when: network.dns.server
-
 - name: create named.conf
   template:
     src: named.conf.j2
