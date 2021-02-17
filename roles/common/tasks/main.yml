@@ -34,6 +34,15 @@
     state: present
   tags: packages
 
+- name: install various network tools
+  community.general.pacman:
+    name:
+      - traceroute
+      - whois
+      - mtr
+    state: present
+  tags: packages
+
 - name: install routers related apps
   community.general.pacman:
     name:
