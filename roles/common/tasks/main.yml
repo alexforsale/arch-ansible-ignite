@@ -15,6 +15,7 @@
       - htop
       - smartmontools
       - progress
+      - sysfsutils
     state: present
   tags: packages
 

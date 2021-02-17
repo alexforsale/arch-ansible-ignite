@@ -81,6 +81,15 @@
     state: started
   tags: configs
 
+- name: install pacman tools
+  community.general.pacman:
+    name:
+      - expac
+      - pacgraph
+    state: present
+    extra_args: --asdeps
+  tags: configs
+
 - name: refresh pacman cache
   community.general.pacman:
     update_cache: true
