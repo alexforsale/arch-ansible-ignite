@@ -68,3 +68,46 @@
     state: started
     enabled: yes
   when: network.dns.server
+
+- name: install dnscrypt-proxy
+  community.general.pacman:
+    name: dnscrypt-proxy
+    state: present
+  when: network.dns.server
+
+- name: install python-urllib3
+  community.general.pacman:
+    name: python-urllib3
+    state: present
+    extra_args: --asdeps
+  when: network.dns.server
+
+- name: configure dnscrypt-proxy.toml listen address
+  lineinfile:
+    dest: /etc/dnscrypt-proxy/dnscrypt-proxy.toml
+    regexp: '^listen_addresses'
+    state: present
+    line: "listen_addresses = ['127.0.0.1:53000', '[::1]:53000']"
+  when: network.dns.server
+
+- name: configure dnscrypt-proxy.toml dnssec
+  lineinfile:
+    dest: /etc/dnscrypt-proxy/dnscrypt-proxy.toml
+    regexp: '^require_dnssec'
+    state: present
+    line: "require_dnssec = true"
+  when: network.dns.server
+
+- name: configure dnscrypt-proxy.toml log level
+  lineinfile:
+    dest: /etc/dnscrypt-proxy/dnscrypt-proxy.toml
+    regexp: '^# log_level'
+    state: present
+    line: "log_level = 2"
+  when: network.dns.server
+
+- name: enable dnscrypt-proxy
+  service:
+    name: dnscrypt-proxy
+    enabled: yes
+  when: network.dns.server
