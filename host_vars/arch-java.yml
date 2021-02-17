@@ -12,6 +12,10 @@ network:
     slave:
       zone: java281.lan
       master: 10.147.20.253
+    forwarders:
+      - 127.0.0.1 port 53000
+      - ::1 port 53000
+      - 10.147.20.253
   lan:
     address: 10.0.10.0
     netmask: 24

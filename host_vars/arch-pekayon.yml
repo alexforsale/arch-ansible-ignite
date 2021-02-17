@@ -15,6 +15,9 @@ network:
       zone: java281.lan
       reverse: 0.10.10.in-addr.arpa
       octet: 253
+    forwarders:
+      - 127.0.0.1 port 53000
+      - ::1 port 53000
   dhcp:
     server: true
   lan:
