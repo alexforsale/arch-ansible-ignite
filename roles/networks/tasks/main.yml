@@ -99,3 +99,8 @@
 - name: nftables setups
   include: nftables.yml
   tags: nftables
+
+- name: multicast setups
+  include: avahi.yml
+  tags: avahi
+  when: network.router

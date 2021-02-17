@@ -1,0 +1,45 @@
+---
+- name: install avahi-related package
+  community.general.pacman:
+    name:
+      - avahi
+      - nss-mdns
+    state: present
+  tags: packages
+
+- name: set domain in avahi-daemon.conf
+  lineinfile:
+    dest: /etc/avahi/avahi-daemon.conf
+    regexp: '^#domain-name='
+    state: present
+    line: "domain-name={{ ansible_domain }}"
+    insertafter: '^#domain-name='
+  tags: configs
+
+- name: set hostname in avahi-daemon.conf
+  lineinfile:
+    dest: /etc/avahi/avahi-daemon.conf
+    regexp: '^#host-name='
+    state: present
+    line: "host-name={{ ansible_hostname }}"
+    insertafter: '^#host-name='
+  tags: configs
+
+# TODO: use other builtins(lineinfile/replace)
+- name: insert mdns to nsswitch.conf
+  shell: sed -i 's/myhostname resolve/myhostname mdns resolve/' /etc/nsswitch.conf
+  tags: configs
+
+- name: add domain to mdns.allow
+  blockinfile:
+    path: /etc/mdns.allow
+    block: "{{ ansible_domain }}"
+    create: true
+  tags: configs
+
+- name: enable and start avahi.service
+  service:
+    name: avahi-daemon.service
+    state: started
+    enabled: true
+  tags: configs
