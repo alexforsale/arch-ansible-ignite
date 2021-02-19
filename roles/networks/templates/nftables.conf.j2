@@ -62,8 +62,8 @@ table inet filter {
     udp dport tftp ip6 saddr $local6 counter accept comment "Accept TFTP"
     udp dport tftp ip saddr $local4 counter accept comment "Accept TFTP"
     udp dport palace-2 ip saddr $local4 counter accept comment "Accept zerotier"
-    udp dport db-lsp-disc ip saddr $local4 counter accept "Accept dropbox broadcast"
-    udp dport db-lsp-disc ip6 saddr $local6 counter accept "Accept dropbox broadcast"
+    udp dport db-lsp-disc ip saddr $local4 counter accept comment "Accept dropbox broadcast"
+    udp dport db-lsp-disc ip6 saddr $local6 counter accept comment "Accept dropbox broadcast"
 
     udp sport 1900 udp dport >= 1024 ip6 saddr $local6 meta pkttype unicast limit rate 4/second burst 20 packets counter accept comment "Accept UPnP IGD port mapping reply"
     udp sport 1900 udp dport >= 1024 ip saddr $local4 meta pkttype unicast limit rate 4/second burst 20 packets counter accept comment "Accept UPnP IGD port mapping reply"
