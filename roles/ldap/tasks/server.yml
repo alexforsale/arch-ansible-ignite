@@ -1,0 +1,205 @@
+---
+- name: stop slapd service
+  service:
+    name: slapd.service
+    state: stopped
+  tags: configs
+
+# - name: copy /usr/share/doc/samba/examples/LDAP/samba.schema
+#  copy:
+#    src: /usr/share/doc/samba/examples/LDAP/samba.schema
+#    remote_src: true
+#    dest: /etc/openldap/schema/samba.schema
+#    owner: ldap
+#    group: ldap
+#    mode: '0644'
+#  tags: configs
+
+- name: get samba.ldif from samba github
+  get_url:
+    url: https://raw.githubusercontent.com/samba-team/samba/master/examples/LDAP/samba.ldif
+    dest: /etc/openldap/schema/samba.ldif
+    owner: ldap
+    group: ldap
+    mode: '0644'
+  tags: configs
+
+- name: copy the default config database
+  copy:
+    src: /var/lib/openldap/openldap-data/DB_CONFIG.example
+    remote_src: true
+    dest: /var/lib/openldap/openldap-data/DB_CONFIG
+    owner: ldap
+    group: ldap
+    mode: '0644'
+  tags: configs
+
+- name: remove /etc/openldap/slapd.d
+  file:
+    path: /etc/openldap/slapd.d
+    state: absent
+  tags: configs
+
+- name: re-create /etc/openldap/slapd.d
+  file:
+    path: /etc/openldap/slapd.d
+    state: directory
+    owner: ldap
+    group: ldap
+    mode: '0755'
+  tags: configs
+
+# - name: copy slapd.conf
+#  template:
+#    src: slapd.conf.j2
+#    dest: /etc/openldap/slapd.conf
+#    owner: ldap
+#    group: ldap
+#    mode: '0644'
+#    validate: slaptest -u -f %s
+#  tags: configs
+
+- name: create ssl directory
+  file:
+    path: /etc/openldap/ssl
+    state: directory
+    owner: ldap
+    group: ldap
+    mode: '0755'
+  tags: configs
+
+- name: create self-sign certificates
+  command: |
+      openssl req -subj "/C={{ cert.country }}"
+      -subj "/ST={{ cert.state }}"
+      -subj "/L={{ cert.locality }}"
+      -subj "/O={{ cert.organization }}"
+      -subj "/OU={{ cert.organizationalunit }}"
+      -subj "/CN={{ cert.commonname }}"
+      -subj "/emailAddress={{ cert.email }}"
+      -new -x509 -nodes -out slapdcert.pem -keyout slapdkey.pem
+      -days 365
+  become: true
+  become_user: ldap
+  args:
+    chdir: /etc/openldap/ssl
+    creates: "/etc/openldap/ssl/*.pem"
+  tags: configs
+
+- name: set permission for ssl key
+  file:
+    path: /etc/openldap/ssl/slapdkey.pem
+    owner: ldap
+    group: ldap
+    mode: '0600'
+  tags: configs
+
+- name: set permission for ssl cert
+  file:
+    path: /etc/openldap/ssl/slapdcert.pem
+    owner: ldap
+    group: ldap
+    mode: '0644'
+  tags: configs
+
+- name: copy slapd.ldif
+  template:
+    src: slapd.ldif.j2
+    dest: /etc/openldap/slapd.ldif
+    owner: ldap
+    group: ldap
+    mode: '0644'
+  tags: configs
+
+# - name: generate new config files
+#  become: true
+#  become_user: ldap
+#  command:
+#    cmd: slaptest -u -f /etc/openldap/slapd.conf -F /etc/openldap/slapd.d/
+#  tags: configs
+
+- name: generate new config files
+  become: true
+  become_user: ldap
+  command:
+    cmd: slapadd -F /etc/openldap/slapd.d -n 0 -l /etc/openldap/slapd.ldif
+  tags: configs
+
+- name: create new systemd unit for ssl slapd
+  template:
+    src: slapd.service.j2
+    dest: /etc/systemd/system/slapd.service
+    mode: '0644'
+  tags: configs
+
+- name: reload systemd
+  systemd:
+    daemon_reload: true
+  tags: configs
+
+- name: start and enable slapd service
+  service:
+    name: slapd.service
+    state: started
+    enabled: true
+  tags: configs
+
+- name: create ldap parent entry
+  community.general.ldap_entry:
+    dn: "{{ ldap_suffix }}"
+    objectClass:
+      - dcObject
+      - organization
+    attributes:
+      dc: "{{ cert.organizationalunit }}"
+      o: "{{ cert.organization }}"
+      description: "{{ cert.organizationalunit }} directory"
+    bind_dn: "cn={{ ldap.rootdn }},{{ ldap_suffix }}"
+    bind_pw: "{{ ldap_rootpw }}"
+    validate_certs: false
+    server_uri: ldaps://localhost:636
+  tags: configs
+
+- name: create ldap entry for rootdn
+  community.general.ldap_entry:
+    dn: "cn={{ ldap.rootdn }},{{ ldap_suffix }}"
+    objectClass:
+      - organizationalRole
+      - top
+    attributes:
+      cn: "{{ ldap.rootdn }}"
+      roleOccupant: "{{ ldap_suffix }}"
+      description: Directory Manager
+    bind_dn: "cn={{ ldap.rootdn }},{{ ldap_suffix }}"
+    bind_pw: "{{ ldap_rootpw }}"
+    validate_certs: false
+    server_uri: ldaps://localhost:636
+  tags: configs
+
+- name: create ldap parent entry for users
+  community.general.ldap_entry:
+    dn: "ou=People,{{ ldap_suffix }}"
+    objectClass:
+      - organizationalUnit
+      - top
+    attributes:
+      ou: People
+    bind_dn: "cn={{ ldap.rootdn }},{{ ldap_suffix }}"
+    bind_pw: "{{ ldap_rootpw }}"
+    validate_certs: false
+    server_uri: ldaps://localhost:636
+  tags: configs
+
+- name: create ldap parent entry for groups
+  community.general.ldap_entry:
+    dn: "ou=Group,{{ ldap_suffix }}"
+    objectClass:
+      - organizationalUnit
+      - top
+    attributes:
+      ou: People
+    bind_dn: "cn={{ ldap.rootdn }},{{ ldap_suffix }}"
+    bind_pw: "{{ ldap_rootpw }}"
+    validate_certs: false
+    server_uri: ldaps://localhost:636
+  tags: configs

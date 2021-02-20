@@ -1,0 +1,10 @@
+ldap_rootpw: "{{ vault_ldap_rootpw }}"
+ldap_rootpw_encrypted: "{{ vault_ldap_rootpw_encrypted }}"
+cert:
+  country: Indonesia
+  state: Jawa Barat
+  locality: Bekasi
+  organization: Java281
+  organizationalunit: java281
+  commonname: java281.lan
+  email: alexforsale@yahoo.com

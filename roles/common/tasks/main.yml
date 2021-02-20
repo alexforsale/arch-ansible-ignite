@@ -52,11 +52,12 @@
   when: network.router
   tags: packages
 
-- name: install ansible and python-passlib
+- name: install ansible python-ldap, and python-passlib
   community.general.pacman:
     name:
       - ansible
       - python-passlib
+      - python-ldap
     state: present
   tags: packages
 

@@ -1,0 +1,16 @@
+---
+- name: install openldap
+  community.general.pacman:
+    name: openldap
+    state: present
+  tags: packages
+
+- name: client setup
+  include: client.yml
+  tags: client
+  when: environment_type == "client"
+
+- name: server setup
+  include: server.yml
+  tags: servers
+  when: environment_type == "server"

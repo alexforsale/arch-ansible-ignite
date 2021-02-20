@@ -1,0 +1,10 @@
+# {{ ansible_managed }}
+[Unit]
+Description=OpenLDAP server daemon
+
+[Service]
+Type=forking
+ExecStart=/usr/bin/slapd -u ldap -g ldap -h "ldap://127.0.0.1 ldaps:///"
+
+[Install]
+WantedBy=multi-user.target

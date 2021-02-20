@@ -2,3 +2,12 @@ servers:
   hosts:
     arch-pekayon:
     arch-java:
+
+ldap_servers:
+  hosts:
+    arch-pekayon:
+
+ldap_auth:
+  hosts:
+    arch-pekayon:
+    arch-java:

@@ -1,0 +1,5 @@
+# {{ ansible_managed }}
+BASE    {{ ldap_suffix }}
+URI     ldaps://{{ ldap_server }}.{{ ansible_domain }}:636
+
+TLS_REQCERT allow

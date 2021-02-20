@@ -75,6 +75,8 @@ table inet filter {
     tcp dport domain counter accept
     udp dport bootpc counter accept
     udp dport bootps counter accept
+    udp dport { ldap, ldaps } counter accept
+    tcp dport { ldap, ldaps } counter accept
 
     udp dport 51413 counter accept comment "Accept transmission"
 

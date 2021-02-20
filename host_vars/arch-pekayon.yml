@@ -29,6 +29,10 @@ network:
       end: 10.10.0.200
     router: 10.10.0.253
 
+ldap:
+  server: true
+  rootdn: Manager
+
 display:
   server: xorg
   driver: intel
