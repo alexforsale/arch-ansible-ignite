@@ -104,3 +104,7 @@
   include: avahi.yml
   tags: avahi
   when: network.router
+
+- name: samba setup
+  include: samba.yml
+  tags: samba

@@ -1,0 +1,21 @@
+---
+- name: install samba
+  community.general.pacman:
+    name: samba
+    state: present
+  tags: packages
+
+- name: copy general samba.conf
+  template:
+    src: smb.conf.j2
+    dest: /etc/samba/smb.conf
+    mode: '0644'
+    validate: testparm -s %s
+  tags: configs
+
+- name: enable and start smb.conf
+  service:
+    name: smb.service
+    state: started
+    enabled: true
+  tags: configs

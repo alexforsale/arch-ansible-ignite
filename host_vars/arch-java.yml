@@ -24,3 +24,7 @@ display:
   server: xorg
   driver: intel
   manager: lightdm
+
+samba:
+  workgroup: WORKGROUP
+  printing: false
