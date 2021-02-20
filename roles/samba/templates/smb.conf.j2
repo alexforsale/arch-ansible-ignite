@@ -1,0 +1,44 @@
+# {{ ansible_managed }}
+[global]
+  workgroup = {{ samba.workgroup }}
+  server string = Samba %v at %h
+  server role = standalone server
+  guest account = nobody
+  logging = systemd
+  log file = /var/log/samba/%m.log
+  map to guest = Bad User
+  create mask = 0664
+  directory mask = 2755
+  smb encrypt = desired
+
+  server multi channel support = yes
+  deadtime = 30
+  use sendfile = yes
+  min receivefile size = 16384
+  aio read size = 1
+  aio write size = 1
+
+  #include = /etc/samba/smb.conf.auth
+
+{% if samba.printing %}
+[printers]
+  comment = All Printers
+  path = /usr/spool/samba
+  browseable = no
+# Set public = yes to allow user 'guest account' to print
+  guest ok = no
+  writable = no
+  printable = yes
+{% endif %}
+{% if not samba.printing %}
+  load printers = no
+  printing = bsd
+  printcap name = /dev/null
+  disable spoolss = yes
+  show add printer wizard = no
+{% endif %}
+
+[homes]
+  comment = Home Directories
+  browseable = no
+  writable = yes

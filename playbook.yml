@@ -4,4 +4,5 @@
   roles:
     - {role: common, tags: ['common']}
     - {role: networks, tags: ['networks']}
+    - {role: samba, tags: ['samba']}
     - {role: gui, tags: ['gui']}
