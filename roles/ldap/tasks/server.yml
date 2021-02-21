@@ -24,6 +24,16 @@
     mode: '0644'
   tags: configs
 
+- name: copy sudo ldif
+  copy:
+    remote_src: true
+    src: /usr/share/doc/sudo/schema.olcSudo
+    dest: /etc/openldap/schema/sudo.ldif
+    owner: ldap
+    group: ldap
+    mode: '0644'
+  tags: configs
+
 - name: copy the default config database
   copy:
     src: /var/lib/openldap/openldap-data/DB_CONFIG.example
@@ -198,6 +208,59 @@
       - top
     attributes:
       ou: People
+    bind_dn: "cn={{ ldap.rootdn }},{{ ldap_suffix }}"
+    bind_pw: "{{ ldap_rootpw }}"
+    validate_certs: false
+    server_uri: ldaps://localhost:636
+  tags: configs
+
+- name: create ldap parent entry for SUDOers
+  community.general.ldap_entry:
+    dn: "ou=SUDOers,{{ ldap_suffix }}"
+    objectClass:
+      - organizationalUnit
+      - top
+    attributes:
+      ou: SUDOers
+    bind_dn: "cn={{ ldap.rootdn }},{{ ldap_suffix }}"
+    bind_pw: "{{ ldap_rootpw }}"
+    validate_certs: false
+    server_uri: ldaps://localhost:636
+  tags: configs
+
+- name: create SUDOers entry for root
+  community.general.ldap_entry:
+    dn: "cn=root,ou=SUDOers,{{ ldap_suffix }}"
+    objectClass:
+      - sudoRole
+      - top
+    attributes:
+      cn: root
+      sudoUser: root
+      sudoHost: ALL
+      sudoRunAsUser: ALL
+      sudoCommand: ALL
+      sudoOrder: 1
+    bind_dn: "cn={{ ldap.rootdn }},{{ ldap_suffix }}"
+    bind_pw: "{{ ldap_rootpw }}"
+    validate_certs: false
+    server_uri: ldaps://localhost:636
+  tags: configs
+
+- name: create SUDOers entry for rpcuser
+  community.general.ldap_entry:
+    dn: "cn=rpcuser,ou=SUDOers,{{ ldap_suffix }}"
+    objectClass:
+      - sudoRole
+      - top
+    attributes:
+      cn: rpcuser
+      sudoUser: rpcuser
+      sudoHost: ALL
+      sudoRunAsUser: ALL
+      sudoOption: "!authenticate"
+      sudoCommand: /etc/ctdb/statd-callout
+      sudoOrder: 2
     bind_dn: "cn={{ ldap.rootdn }},{{ ldap_suffix }}"
     bind_pw: "{{ ldap_rootpw }}"
     validate_certs: false

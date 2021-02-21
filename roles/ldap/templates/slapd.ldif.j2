@@ -24,6 +24,7 @@ include: file:///etc/openldap/schema/cosine.ldif
 include: file:///etc/openldap/schema/inetorgperson.ldif
 include: file:///etc/openldap/schema/nis.ldif
 include: file:///etc/openldap/schema/samba.ldif
+include: file:///etc/openldap/schema/sudo.ldif
 
 dn: olcDatabase=frontend,cn=config
 objectClass: olcDatabaseConfig
@@ -67,3 +68,4 @@ olcDbIndex: mail pres,sub,eq
 olcDbIndex: cn pres,sub,eq
 olcDbIndex: sn pres,sub,eq
 olcDbIndex: dc eq
+olcDbIndex: sudoUser eq

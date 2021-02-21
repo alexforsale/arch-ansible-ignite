@@ -2,4 +2,5 @@
 BASE    {{ ldap_suffix }}
 URI     ldaps://{{ ldap_server }}.{{ ansible_domain }}:636
 
+SUDOERS_BASE   ou=SUDOers,{{ ldap_suffix }}
 TLS_REQCERT allow
