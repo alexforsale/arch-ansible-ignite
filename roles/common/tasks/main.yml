@@ -19,6 +19,12 @@
     state: present
   tags: packages
 
+- name: install sudo
+  community.general.pacman:
+    name: sudo
+    state: present
+  tags: packages
+
 - name: install needed dependencies for monitoring-related apps
   community.general.pacman:
     name:
