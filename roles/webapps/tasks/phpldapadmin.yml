@@ -1,0 +1,43 @@
+---
+
+- name: install phpldapadmin
+  community.general.pacman:
+    name: phpldapadmin
+    state: present
+  tags: packages
+
+- name: copy phpldapadmin.conf for httpd
+  copy:
+    src: phpldapadmin.conf
+    dest: /etc/httpd/conf/extra/phpldapadmin.conf
+    owner: root
+    group: root
+    mode: '0644'
+  tags: configs
+
+- name: include phpldapadmin.conf in httpd.conf
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    line: 'Include conf/extra/phpldapadmin.conf'
+  tags: configs
+
+- name: enable ldap in php.ini
+  lineinfile:
+    path: /etc/php/php.ini
+    regex: '^;extension=ldap'
+    line: 'extension=ldap'
+  tags: configs
+
+- name: enable gettext in php.ini
+  lineinfile:
+    path: /etc/php/php.ini
+    regex: '^;extension=gettext'
+    line: 'extension=gettext'
+  tags: configs
+
+- name: set base dn in phpldapadmin
+  lineinfile:
+    path: /etc/webapps/phpldapadmin/config.php
+    regex: "^// $servers->setValue('server','base',array(''));"
+    line: "$servers->setValue('server','base',array('{{ ldap_suffix }}'));"
+  tags: configs

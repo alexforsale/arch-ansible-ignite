@@ -1,0 +1,70 @@
+---
+
+- name: install apache
+  community.general.pacman:
+    name: apache
+    state: present
+  tags: packages
+
+- name: copy ldap certs for httpd
+  copy:
+    src: /etc/openldap/ssl/
+    dest: /etc/httpd/conf/
+    remote_src: true
+  tags: configs
+
+- name: load mod_ssl.so in httpd.conf
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regex: '^#LoadModule ssl_module modules/mod_ssl.so'
+    line: 'LoadModule ssl_module modules/mod_ssl.so'
+  tags: configs
+
+- name: load mod_socache_shmcb.so in httpd.conf
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regex: '^#LoadModule socache_shmcb_module modules/mod_socache_shmcb.so'
+    line: 'LoadModule socache_shmcb_module modules/mod_socache_shmcb.so'
+  tags: configs
+
+- name: include httpd-ssl.conf
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regex: '^#Include conf/extra/httpd-ssl.conf'
+    line: 'Include conf/extra/httpd-ssl.conf'
+  tags: configs
+
+- name: point cert file in httpd-ssl.conf
+  lineinfile:
+    path: /etc/httpd/conf/extra/httpd-ssl.conf
+    regex: '^SSLCertificateFile "/etc/httpd/conf/server.crt"'
+    line: 'SSLCertificateFile "/etc/httpd/conf/slapdcert.pem"'
+  tags: configs
+
+- name: point key file in httpd-ssl.conf
+  lineinfile:
+    path: /etc/httpd/conf/extra/httpd-ssl.conf
+    regex: '^SSLCertificateKeyFile "/etc/httpd/conf/server.key"'
+    line: 'SSLCertificateKeyFile "/etc/httpd/conf/slapdkey.pem"'
+  tags: configs
+
+- name: set server name in httpd-ssl.conf
+  lineinfile:
+    path: /etc/httpd/conf/extra/httpd-ssl.conf
+    regex: '^ServerName www.example.com:443'
+    line: 'ServerName {{ ansible_hostname }}.{{ ansible_domain }}:443'
+  tags: configs
+
+- name: set server email in httpd-ssl.conf
+  lineinfile:
+    path: /etc/httpd/conf/extra/httpd-ssl.conf
+    regex: '^ServerAdmin you@example.com'
+    line: 'ServerAdmin admin@{{ ansible_hostname }}.{{ ansible_domain }}'
+  tags: configs
+
+- name: enable and start httpd
+  service:
+    name: httpd
+    state: started
+    enabled: true
+  tags: configs

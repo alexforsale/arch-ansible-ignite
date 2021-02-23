@@ -3,6 +3,10 @@ servers:
     arch-pekayon:
     arch-java:
 
+webserver:
+  hosts:
+    arch-pekayon:
+
 ldap_servers:
   hosts:
     arch-pekayon:

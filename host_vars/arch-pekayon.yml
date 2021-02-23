@@ -41,3 +41,5 @@ display:
 samba:
   workgroup: WORKGROUP
   printing: false
+
+webserver: apache

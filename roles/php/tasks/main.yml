@@ -1,0 +1,73 @@
+---
+
+- name: install php
+  community.general.pacman:
+    name:
+      - php
+      - php-fpm
+    state: present
+  tags: packages
+
+- name: set timezone to Asia/Jakarta
+  lineinfile:
+    path: /etc/php/php.ini
+    regex: '^;date.timezone ='
+    line: 'date.timezone = Asia/Jakarta'
+  tags: configs
+
+- name: set openbasedir
+  lineinfile:
+    path: /etc/php/php.ini
+    regex: '^;open_basedir ='
+    line: 'open_basedir = /srv/http/:/var/www/:/home/:/tmp/:/var/tmp/:/var/cache/:/usr/share/pear/:/usr/share/webapps/:/etc/webapps/'
+  tags: configs
+
+- name: enable pdo_mysql in php
+  lineinfile:
+    path: /etc/php/php.ini
+    regex: '^;extension=pdo_mysql'
+    line: 'extension=pdo_mysql'
+  tags: configs
+
+- name: enable mysqli in php
+  lineinfile:
+    path: /etc/php/php.ini
+    regex: '^;extension=mysql'
+    line: 'extension=mysqli'
+  tags: configs
+
+- name: enable mod_proxy in httpd.conf
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regex: '^#LoadModule proxy_module modules/mod_proxy.so'
+    line: 'LoadModule proxy_module modules/mod_proxy.so'
+  tags: configs
+
+- name: enable mod_proxy_fcgi in httpd.conf
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    regex: '^#LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so'
+    line: 'LoadModule proxy_fcgi_module modules/mod_proxy_fcgi.so'
+  tags: configs
+
+- name: create php-fpm.conf
+  copy:
+    src: php-fpm.conf
+    dest: /etc/httpd/conf/extra/php-fpm.conf
+    owner: root
+    group: root
+    mode: '0644'
+  tags: configs
+
+- name: include php-fpm.conf in httpd.conf
+  lineinfile:
+    path: /etc/httpd/conf/httpd.conf
+    line: 'Include conf/extra/php-fpm.conf'
+  tags: configs
+
+- name: start and enable php-fpm
+  service:
+    name: php-fpm
+    state: started
+    enabled: true
+  notify: restart httpd

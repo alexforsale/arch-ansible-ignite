@@ -85,7 +85,7 @@
       -subj "/L={{ cert.locality }}"
       -subj "/O={{ cert.organization }}"
       -subj "/OU={{ cert.organizationalunit }}"
-      -subj "/CN={{ cert.commonname }}"
+      -subj "/CN={{ ansible_hostname }}.{{ cert.commonname }}"
       -subj "/emailAddress={{ cert.email }}"
       -new -x509 -nodes -out slapdcert.pem -keyout slapdkey.pem
       -days 365

@@ -1,0 +1,7 @@
+---
+
+- name: include phpldapadmin
+  include: phpldapadmin.yml
+  when: "'ldap_servers' in group_names"
+  notify: restart httpd
+  tags: phpldapadmin
