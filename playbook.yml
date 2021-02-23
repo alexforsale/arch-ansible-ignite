@@ -6,17 +6,29 @@
     - {role: networks, tags: ['networks']}
     - {role: samba, tags: ['samba']}
     - {role: gui, tags: ['gui']}
+  tags: base
 
 - hosts: ldap_auth
   remote_user: root
   roles:
-    - {role: ldap, tags: ['ldap']}
+    - {role: ldap, tags: ['ldap-server']}
   vars:
     environment_type: client
+  tags: ldap
 
 - hosts: ldap_servers
   remote_user: root
   roles:
-    - {role: ldap, tags: ['ldap']}
+    - {role: ldap, tags: ['ldap-client']}
   vars:
     environment_type: server
+  tags: ldap
+
+- hosts: webserver
+  remote_user: root
+  roles:
+    - {role: webserver, tags: ['webserver', 'lamp']}
+    - {role: db, tags: ['db', 'lamp']}
+    - {role: php, tags: ['php', 'lamp']}
+    - {role: webapps, tags: ['webapps']}
+  tags: webserver
