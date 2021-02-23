@@ -23,14 +23,14 @@
 
 - name: enable ldap in php.ini
   lineinfile:
-    path: /etc/php/php.ini
+    path: /etc/php7/php.ini
     regex: '^;extension=ldap'
     line: 'extension=ldap'
   tags: configs
 
 - name: enable gettext in php.ini
   lineinfile:
-    path: /etc/php/php.ini
+    path: /etc/php7/php.ini
     regex: '^;extension=gettext'
     line: 'extension=gettext'
   tags: configs
