@@ -207,7 +207,35 @@
       - organizationalUnit
       - top
     attributes:
-      ou: People
+      ou: Group
+    bind_dn: "cn={{ ldap.rootdn }},{{ ldap_suffix }}"
+    bind_pw: "{{ ldap_rootpw }}"
+    validate_certs: false
+    server_uri: ldaps://localhost:636
+  tags: configs
+
+- name: create ldap parent entry for idmap
+  community.general.ldap_entry:
+    dn: "ou=IDmap,{{ ldap_suffix }}"
+    objectClass:
+      - organizationalUnit
+      - top
+    attributes:
+      ou: IDmap
+    bind_dn: "cn={{ ldap.rootdn }},{{ ldap_suffix }}"
+    bind_pw: "{{ ldap_rootpw }}"
+    validate_certs: false
+    server_uri: ldaps://localhost:636
+  tags: configs
+
+- name: create ldap parent entry for Computers
+  community.general.ldap_entry:
+    dn: "ou=Computers,{{ ldap_suffix }}"
+    objectClass:
+      - organizationalUnit
+      - top
+    attributes:
+      ou: Computers
     bind_dn: "cn={{ ldap.rootdn }},{{ ldap_suffix }}"
     bind_pw: "{{ ldap_rootpw }}"
     validate_certs: false
@@ -265,4 +293,58 @@
     bind_pw: "{{ ldap_rootpw }}"
     validate_certs: false
     server_uri: ldaps://localhost:636
+  tags: configs
+
+- name: create new systemd unit for samba auth
+  template:
+    src: smb.conf.auth.j2
+    dest: /etc/samba/smb.conf.auth
+    mode: '0644'
+  tags: configs
+
+- name: set samba password
+  command:
+    cmd: "smbpasswd -w {{ ldap_admin_pw }}"
+  tags: configs
+
+- name: set idmap password for {{ samba.workgroup }}
+  command:
+    cmd: "net idmap set secret '{{ samba.workgroup }}' {{ ldap_admin_pw }}"
+  tags: configs
+
+- name: start winbind
+  service:
+    name: winbind
+    state: started
+  tags: configs
+
+- name: provision domain
+  command:
+    cmd: "net sam provision"
+  tags: configs
+
+- name: set password for Administrator
+  command:
+    cmd: "smbpasswd -w {{ ldap_admin_pw }} Administrator"
+  tags: configs
+
+- name: enable and (re)start smb
+  service:
+    name: smb
+    state: restarted
+    enabled: true
+  tags: configs
+
+- name: enable and (re)start nmb
+  service:
+    name: nmb
+    state: restarted
+    enabled: true
+  tags: configs
+
+- name: enable and (re)start winbind
+  service:
+    name: winbind
+    state: restarted
+    enabled: true
   tags: configs

@@ -5,3 +5,4 @@ kernel:
   parameters: "loglevel=5 quiet consoleblank=600"
 ldap_server: arch-pekayon
 ldap_suffix: dc=java281,dc=lan
+ldap_rootdn: Manager

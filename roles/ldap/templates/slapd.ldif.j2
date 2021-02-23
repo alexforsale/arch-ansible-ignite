@@ -41,6 +41,13 @@ olcAccess: to *
        by self write
        by users read
        by anonymous auth
+olcAccess: to attrs=loginShell
+       by dn="cn={{ ldap.rootdn }},{{ ldap_suffix }}" write
+       by self write
+       by * read
+olcAccess: to attrs=sambaNTPassword,sambaLMPassword,sambaPwdLastSet,sambaPwdMustChange
+       by dn="cn={{ ldap.rootdn }},{{ ldap_suffix }}" write
+       by self write by * none
 
 dn: olcDatabase={0}config,cn=config
 objectClass: olcDatabaseConfig
@@ -69,3 +76,15 @@ olcDbIndex: cn pres,sub,eq
 olcDbIndex: sn pres,sub,eq
 olcDbIndex: dc eq
 olcDbIndex: sudoUser eq
+olcDbIndex: ou eq
+olcDbIndex: givenname eq
+olcDbIndex: loginShell eq
+olcDbIndex: uniqueMember eq,pres
+olcDbIndex: sambaSID eq
+olcDbIndex: sambaPrimaryGroupSID eq
+olcDbIndex: sambaGroupType eq
+olcDbIndex: sambaSIDList eq
+olcDbIndex: sambaDomainName eq
+olcDbIndex: default sub
+olcDbIndex: nisMapName eq
+olcDbIndex: nisMapEntry eq

@@ -1,0 +1,6 @@
+#%PAM-1.0
+# {{ ansible_managed }}
+auth           sufficient      pam_sss.so
+auth            include         system-auth
+account         include         system-auth
+session         include         system-auth

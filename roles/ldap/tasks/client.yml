@@ -7,3 +7,102 @@
     group: ldap
     mode: '0644'
   tags: configs
+
+- name: install sssd
+  community.general.pacman:
+    name: sssd
+    state: present
+  tags: packages
+
+- name: install sssd.conf
+  template:
+    src: sssd.conf.j2
+    dest: /etc/sssd/sssd.conf
+    owner: root
+    group: root
+    mode: '0600'
+  tags: configs
+
+- name: configure nscd.conf passwd cache
+  lineinfile:
+    path: /etc/nscd.conf
+    regex: "^\tenable-cache\t\tpasswd\t\tyes"
+    line: "\tenable-cache\t\tpasswd\t\tno"
+  tags: configs
+
+- name: configure nscd.conf group cache
+  lineinfile:
+    path: /etc/nscd.conf
+    regex: "^\tenable-cache\t\tgroup\t\tyes"
+    line: "\tenable-cache\t\tgroup\t\tno"
+  tags: configs
+
+- name: configure nscd.conf group cache
+  lineinfile:
+    path: /etc/nscd.conf
+    regex: "^\tenable-cache\t\tnetgroup\tyes"
+    line: "\tenable-cache\t\tnetgroup\tno"
+  tags: configs
+
+- name: add sss to nsswitch passwd
+  lineinfile:
+    path: /etc/nsswitch.conf
+    regex: '^passwd: files systemd'
+    line: 'passwd: files sss systemd'
+  tags: configs
+
+- name: add sss to nsswitch group
+  lineinfile:
+    path: /etc/nsswitch.conf
+    regex: '^group: files systemd'
+    line: 'group: files sss systemd'
+  tags: configs
+
+- name: add sss to nsswitch shadow
+  lineinfile:
+    path: /etc/nsswitch.conf
+    regex: '^shadow: files'
+    line: 'shadow: files sss'
+  tags: configs
+
+- name: add sudoers to nsswitch
+  lineinfile:
+    path: /etc/nsswitch.conf
+    line: 'sudoers: files sss'
+    insertafter: '^shadow: files sss'
+  tags: configs
+
+- name: install /etc/pam.d/system-auth
+  template:
+    src: system-auth.j2
+    dest: /etc/pam.d/system-auth
+    mode: '0644'
+  tags: configs
+
+- name: install /etc/pam.d/su
+  template:
+    src: su.j2
+    dest: /etc/pam.d/su
+    mode: '0644'
+  tags: configs
+
+- name: install /etc/pam.d/sudo
+  template:
+    src: sudo.j2
+    dest: /etc/pam.d/sudo
+    mode: '0644'
+  tags: configs
+
+- name: install /etc/pam.d/passwd
+  template:
+    src: passwd.j2
+    dest: /etc/pam.d/passwd
+    mode: '0644'
+  tags: configs
+
+- name: enable and start sssd
+  service:
+    name: sssd
+    state: started
+    enabled: true
+  tags: configs

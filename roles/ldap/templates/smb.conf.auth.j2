@@ -1,0 +1,36 @@
+# {{ ansible_managed }}
+;  domain logons = yes
+;  os level = 65
+;  time server = yes
+  passdb backend = ldapsam:"ldaps://{{ ldap_server }}.{{ ansible_domain }}/"
+  ldapsam:editposix = yes
+  ldapsam:trusted = yes
+  ldap admin dn = cn={{ ldap_rootdn }},{{ ldap_suffix }}
+  ldap suffix = {{ ldap_suffix }}
+  ldap group suffix = ou=Group
+  ldap machine suffix = ou=Computers
+  ldap user suffix = ou=People
+  ldap ssl = off
+  idmap config *: backend = tdb
+  idmap config *: range = 3000-7999
+  idmap config {{ samba.workgroup }}: backend = ldap
+  idmap config {{ samba.workgroup }}: range = 10000-19999
+  idmap config {{ samba.workgroup }}: ldap_url = ldaps://{{ ldap_server }}.{{ ansible_domain }}/
+  idmap config {{ samba.workgroup }}: ldap_base_dn = ou=IDmap,{{ ldap_suffix }}
+  idmap config {{ samba.workgroup }}: ldap_user_dn = cn={{ ldap_rootdn }},{{ ldap_suffix }}
+  ldap delete dn = yes
+  ldap password sync = yes
+;  winbind use default domain = yes
+;  wins support = yes
+  template shell = /bin/bash
+  template homedir = /home/%U
+  obey pam restrictions = yes
+  logon home = ""
+  logon path = ""
+  dns proxy = no
+  store dos attributes = yes
+  map read only = no
+  map archive = no
+  dos filetime resolution = yes
+  fake directory create times = yes
+  csc policy = disable

@@ -1,0 +1,46 @@
+# {{ ansible_managed }}
+[sssd]
+config_file_version = 2
+services = nss, pam, sudo
+domains = LDAP
+debug_level = 10
+
+[nss]
+debug_level = 10
+
+[pam]
+debug_level = 10
+
+[sudo]
+debug_level = 10
+
+[domain/LDAP]
+cache_credentials = true
+enumerate = true
+debug_level = 10
+
+id_provider = ldap
+auth_provider = ldap
+sudo_provider = ldap
+chpass_provider = ldap
+
+ldap_uri = ldaps://{{ ldap_server }}.{{ ansible_domain }}/
+
+ldap_search_base = {{ ldap_suffix }}
+ldap_user_search_base = ou=People,{{ ldap_suffix }}
+ldap_group_search_base = ou=Group,{{ ldap_suffix }}
+
+ldap_id_use_start_tls = true
+ldap_tls_reqcert = allow
+#ldap_tls_cacert = /etc/openldap/certs/cacerts.pem
+ldap_chpass_uri = ldaps://{{ ldap_server }}.{{ ansible_domain }}/
+entry_cache_timeout = 5400
+ldap_network_timeout = 2
+cache_credentials = true
+
+# OpenLDAP supports posixGroup, uncomment the following two lines
+# to get group membership support (and comment the other conflicting parameters)
+ldap_schema = rfc2307
+ldap_group_member = memberUid
+
+ldap_sudo_search_base = ou=SUDOers,{{ ldap_suffix }}
