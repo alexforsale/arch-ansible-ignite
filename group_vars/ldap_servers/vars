@@ -8,3 +8,6 @@ cert:
   organizationalunit: java281
   commonname: java281.lan
   email: alexforsale@yahoo.com
+ldap_admin_user: "{{ vault_ldap_admin_user }}"
+ldap_admin_pw: "{{ vault_ldap_admin_pw }}"
+ldap_admin_pw_encrypted: "{{ vault_ldap_admin_pw_encrypted }}"
